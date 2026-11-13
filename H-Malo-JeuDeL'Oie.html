@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de l'Oie Moderne & Supérieur</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* THEME VARIABLES */
+        :root[data-theme="dark"] {
+            --bg-main: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            --panel-bg: rgba(30, 41, 59, 0.75);
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-color: #f8fafc;
+            --accent-color: #6366f1;
+        }
+        :root[data-theme="light"] {
+            --bg-main: linear-gradient(135deg, #e0f2fe 0%, #f1f5f9 50%, #e2e8f0 100%);
+            --panel-bg: rgba(255, 255, 255, 0.85);
+            --card-bg: rgba(0, 0, 0, 0.03);
+            --border-color: rgba(0, 0, 0, 0.1);
+            --text-color: #0f172a;
+            --accent-color: #4f46e5;
+        }
+        :root[data-theme="ocean"] {
+            --bg-main: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #0c4a6e 100%);
+            --panel-bg: rgba(12, 74, 110, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.2);
+            --text-color: #f0f9ff;
+            --accent-color: #38bdf8;
+        }
+        :root[data-theme="rose"] {
+            --bg-main: linear-gradient(135deg, #f43f5e 0%, #be123c 50%, #881337 100%);
+            --panel-bg: rgba(136, 19, 55, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.2);
+            --text-color: #fff1f2;
+            --accent-color: #fb7185;
+        }
+        :root[data-theme="forest"] {
+            --bg-main: linear-gradient(135deg, #059669 0%, #047857 50%, #064e3b 100%);
+            --panel-bg: rgba(6, 78, 59, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.2);
+            --text-color: #ecfdf5;
+            --accent-color: #34d399;
+        }
+        :root[data-theme="cherry"] {
+            --bg-main: linear-gradient(135deg, #dc2626 0%, #991b1b 50%, #450a0a 100%);
+            --panel-bg: rgba(69, 10, 10, 0.85);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.2);
+            --text-color: #fef2f2;
+            --accent-color: #f87171;
+        }
+        :root[data-theme="sun"] {
+            --bg-main: linear-gradient(135deg, #d97706 0%, #b45309 50%, #78350f 100%);
+            --panel-bg: rgba(120, 53, 15, 0.85);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.2);
+            --text-color: #fffbeb;
+            --accent-color: #fbbf24;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-color);
+            min-height: 100vh;
+            transition: background 0.5s ease;
+        }
+
+        .glass-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-color);
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border-color);
+        }
+
+        /* 3D DICE STYLES */
+        .dice-scene {
+            width: 60px;
+            height: 60px;
+            perspective: 600px;
+        }
+        .cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.3, 1.1);
+        }
+        .cube-face {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.15);
+        }
+        .cube-face-1 { transform: rotateY(0deg) translateZ(30px); }
+        .cube-face-2 { transform: rotateY(90deg) translateZ(30px); }
+        .cube-face-3 { transform: rotateY(180deg) translateZ(30px); }
+        .cube-face-4 { transform: rotateY(-90deg) translateZ(30px); }
+        .cube-face-5 { transform: rotateX(90deg) translateZ(30px); }
+        .cube-face-6 { transform: rotateX(-90deg) translateZ(30px); }
+
+        /* Dots pattern on die */
+        .dot {
+            width: 10px;
+            height: 10px;
+            background-color: #0f172a;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        /* SPIRAL BOARD GRID LAYOUT */
+        #board-grid-wrapper {
+            position: relative;
+            display: grid;
+            gap: 6px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .tile-cell {
+            position: relative;
+            border-radius: 12px;
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            transition: transform 0.2s, box-shadow 0.2s;
+            user-select: none;
+        }
+
+        .tile-cell:hover {
+            transform: scale(1.03);
+            z-index: 10;
+        }
+
+        /* SLIDING PAWN CONTAINER */
+        .pawn-element {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            border: 2px solid #ffffff;
+            z-index: 40;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+        }
+
+        /* CUSTOM SCROLLBAR */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+    </style>
+</head>
+<body class="p-2 md:p-6 flex flex-col justify-between">
+
+    <!-- HEADER -->
+    <header class="max-w-7xl mx-auto w-full mb-3 flex flex-wrap justify-between items-center glass-panel p-3 md:p-4 rounded-2xl gap-3">
+        <div class="flex items-center space-x-3">
+            <div class="p-2.5 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-500/30 text-white">
+                <i class="fa-solid fa-feather-pointed text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-black tracking-tight">Jeu de l'Oie Moderne</h1>
+                <p class="text-xs opacity-75 hidden sm:block">Parcours dynamique • Avignon, Marseille, Lyon, Paris</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <!-- Theme Selector -->
+            <div class="flex items-center space-x-1.5 glass-card px-3 py-1.5 rounded-xl">
+                <i class="fa-solid fa-palette text-xs opacity-80"></i>
+                <select id="theme-select" class="bg-transparent text-xs font-bold focus:outline-none cursor-pointer">
+                    <option value="dark" class="text-black">🌙 Obscur</option>
+                    <option value="light" class="text-black">☀️ Clair</option>
+                    <option value="ocean" class="text-black">🌊 Océan</option>
+                    <option value="rose" class="text-black">🍬 Rose Bonbon</option>
+                    <option value="forest" class="text-black">🌲 Vert Forêt</option>
+                    <option value="cherry" class="text-black">🍒 Rouge Cerise</option>
+                    <option value="sun" class="text-black">☀️ Jaune Solaire</option>
+                </select>
+            </div>
+
+            <button id="btn-rules" class="px-3 py-1.5 glass-card hover:bg-white/20 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
+                <i class="fa-solid fa-book-open"></i> Règles
+            </button>
+
+            <button id="btn-restart-game" class="hidden px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-lg shadow-rose-900/20">
+                <i class="fa-solid fa-rotate-left"></i> Relancer
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto w-full flex-grow flex flex-col justify-center">
+
+        <!-- ================= ACCUEIL / CONFIGURATION ================= -->
+        <section id="setup-screen" class="glass-panel p-5 md:p-8 rounded-3xl max-w-4xl mx-auto w-full shadow-2xl relative">
+            <h2 class="text-2xl md:text-3xl font-extrabold mb-6 text-center flex items-center justify-center gap-2">
+                <i class="fa-solid fa-sliders text-indigo-400"></i> Configuration du Jeu
+            </h2>
+
+            <!-- Quick Presets -->
+            <div class="mb-6 flex flex-wrap items-center justify-center gap-2">
+                <span class="text-xs font-bold opacity-75 mr-2">Préréglages rapides :</span>
+                <button type="button" class="btn-preset px-3 py-1.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/60 border border-indigo-400/30 text-xs font-bold transition" data-preset="normal">⚖️ Normal</button>
+                <button type="button" class="btn-preset px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/60 border border-purple-400/30 text-xs font-bold transition" data-preset="chaos">🌀 Chaos</button>
+                <button type="button" class="btn-preset px-3 py-1.5 rounded-xl bg-amber-600/30 hover:bg-amber-600/60 border border-amber-400/30 text-xs font-bold transition" data-preset="chance">🍀 Cartes & Chance</button>
+            </div>
+
+            <form id="config-form" class="space-y-6">
+                <!-- Grid 2 Cols -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Joueurs & Emoji Picker -->
+                    <div class="glass-card p-5 rounded-2xl space-y-4">
+                        <div class="flex justify-between items-center">
+                            <label class="font-bold text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-users text-indigo-400"></i> Joueurs (<span id="player-count-val">4</span>)
+                            </label>
+                            <button type="button" id="btn-random-names" class="text-[11px] px-2.5 py-1 bg-indigo-600/40 hover:bg-indigo-600/70 border border-indigo-400/30 rounded-lg transition font-semibold">
+                                <i class="fa-solid fa-dice"></i> Noms Aléatoires
+                            </button>
+                        </div>
+                        <input type="range" id="input-players" min="2" max="8" value="4" class="w-full accent-indigo-500 cursor-pointer">
+                        <div id="players-list-inputs" class="space-y-2 max-h-52 overflow-y-auto pr-1">
+                            <!-- Injected dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Plateau & Dés -->
+                    <div class="glass-card p-5 rounded-2xl space-y-4 flex flex-col justify-between">
+                        <div>
+                            <label class="font-bold text-sm flex items-center gap-2 mb-2">
+                                <i class="fa-solid fa-map text-emerald-400"></i> Nombre de Cases (<span id="board-size-val">60</span>)
+                            </label>
+                            <input type="range" id="input-board-size" min="50" max="100" value="60" class="w-full accent-emerald-500 cursor-pointer">
+                            <p class="text-[11px] opacity-75 mt-2">
+                                <i class="fa-solid fa-location-dot"></i> Villes fixes : Avignon (20%), Marseille (40%), Lyon (60%), Paris (80%).
+                            </p>
+                        </div>
+
+                        <div class="pt-4 border-t border-white/10">
+                            <label class="font-bold text-sm flex items-center gap-2 mb-2">
+                                <i class="fa-solid fa-dice text-amber-400"></i> Configuration des Dés
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="flex items-center space-x-2 p-2.5 rounded-xl border border-white/10 glass-card cursor-pointer hover:border-indigo-500">
+                                    <input type="radio" name="dice-count" value="1" class="accent-indigo-500">
+                                    <span class="text-xs font-bold">1 Dé</span>
+                                </label>
+                                <label class="flex items-center space-x-2 p-2.5 rounded-xl border border-white/10 glass-card cursor-pointer hover:border-indigo-500">
+                                    <input type="radio" name="dice-count" value="2" checked class="accent-indigo-500">
+                                    <span class="text-xs font-bold">2 Dés</span>
+                                </label>
+                            </div>
+
+                            <div id="double-rule-container" class="mt-3 flex items-center justify-between p-2.5 rounded-xl border border-white/10 glass-card">
+                                <span class="text-xs opacity-90">Rejouer si double (ex: 2 et 2)</span>
+                                <input type="checkbox" id="input-double-rule" checked class="w-4 h-4 accent-indigo-500 rounded cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Répartition des cases -->
+                <div class="glass-card p-5 rounded-2xl space-y-4">
+                    <div class="flex justify-between items-center">
+                        <label class="font-bold text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie text-pink-400"></i> Pourcentage des types de cases (%)
+                        </label>
+                        <div class="text-xs font-extrabold px-3 py-1 rounded-full border bg-black/30" id="total-percent-badge">
+                            Total : <span id="total-percent">100</span>%
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <div class="glass-card p-3 rounded-xl border border-white/10">
+                            <span class="text-[11px] opacity-75 block mb-1">Vides</span>
+                            <input type="number" min="0" max="100" value="40" data-type="empty" class="tile-percent-input w-full bg-black/30 border border-white/20 rounded-lg px-2 py-1 text-center font-bold">
+                        </div>
+                        <div class="glass-card p-3 rounded-xl border border-white/10">
+                            <span class="text-[11px] text-emerald-400 block mb-1"><i class="fa-solid fa-bolt"></i> Boost (+X)</span>
+                            <input type="number" min="0" max="100" value="15" data-type="boost" class="tile-percent-input w-full bg-black/30 border border-white/20 rounded-lg px-2 py-1 text-center font-bold text-emerald-400">
+                        </div>
+                        <div class="glass-card p-3 rounded-xl border border-white/10">
+                            <span class="text-[11px] text-rose-400 block mb-1"><i class="fa-solid fa-backward"></i> Recul (-X)</span>
+                            <input type="number" min="0" max="100" value="15" data-type="recul" class="tile-percent-input w-full bg-black/30 border border-white/20 rounded-lg px-2 py-1 text-center font-bold text-rose-400">
+                        </div>
+                        <div class="glass-card p-3 rounded-xl border border-white/10">
+                            <span class="text-[11px] text-purple-400 block mb-1"><i class="fa-solid fa-user-ninja"></i> OVNI</span>
+                            <input type="number" min="0" max="100" value="10" data-type="ovni" class="tile-percent-input w-full bg-black/30 border border-white/20 rounded-lg px-2 py-1 text-center font-bold text-purple-400">
+                        </div>
+                        <div class="glass-card p-3 rounded-xl border border-white/10">
+                            <span class="text-[11px] text-amber-400 block mb-1"><i class="fa-solid fa-clover"></i> Chance</span>
+                            <input type="number" min="0" max="100" value="10" data-type="chance" class="tile-percent-input w-full bg-black/30 border border-white/20 rounded-lg px-2 py-1 text-center font-bold text-amber-400">
+                        </div>
+                        <div class="glass-card p-3 rounded-xl border border-white/10">
+                            <span class="text-[11px] text-blue-400 block mb-1"><i class="fa-solid fa-box-archive"></i> Cartes</span>
+                            <input type="number" min="0" max="100" value="10" data-type="card" class="tile-percent-input w-full bg-black/30 border border-white/20 rounded-lg px-2 py-1 text-center font-bold text-blue-400">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" id="btn-start-game" class="px-8 py-3.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:scale-105 text-white font-black text-lg rounded-2xl shadow-xl transition transform">
+                        <i class="fa-solid fa-play mr-2"></i> Démarrer la Partie
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- ================= ÉCRAN DE JEU ================= -->
+        <section id="game-screen" class="hidden flex-col gap-4">
+            
+            <!-- 1. SYSTEME DE NOTIFICATION HAUT DE PAGE -->
+            <div id="top-notification-banner" class="w-full glass-panel py-3 px-4 rounded-2xl flex items-center justify-between border-l-4 border-indigo-500 shadow-lg transition-all duration-300">
+                <div class="flex items-center space-x-3">
+                    <div id="notif-pawn-avatar" class="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-lg shadow">
+                        🦆
+                    </div>
+                    <div>
+                        <h3 id="notif-title" class="font-black text-sm md:text-base tracking-wide">C'est au tour de Joueur 1 !</h3>
+                        <p id="notif-subtitle" class="text-xs opacity-80">Lancez le(s) dé(s) pour continuer votre chemin.</p>
+                    </div>
+                </div>
+                <div id="notif-badge" class="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 font-extrabold text-xs uppercase tracking-wider border border-indigo-500/30">
+                    En Tour
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- COLONNE GAUCHE : PLATEAU EN SPIRALE (2/3 Écran) -->
+                <div class="lg:col-span-2 glass-panel p-4 rounded-3xl flex flex-col justify-between shadow-2xl relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-sm font-black uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-map-location-dot text-indigo-400"></i> Plateau Spirale
+                        </h2>
+                        <span class="text-xs opacity-75"><i class="fa-solid fa-flag-checkered text-emerald-400"></i> Fin : Case <span id="max-tile-display">60</span></span>
+                    </div>
+
+                    <!-- BOARD WRAPPER -->
+                    <div id="board-grid-container" class="relative w-full overflow-x-auto p-2 bg-black/20 rounded-2xl border border-white/5 min-h-[420px] flex items-center justify-center">
+                        <div id="board-grid-wrapper">
+                            <!-- Dynamic Tiles and SVG Central Goose injected here -->
+                        </div>
+                        <!-- Pawns dynamic layer -->
+                        <div id="pawns-layer" class="absolute inset-0 pointer-events-none"></div>
+                    </div>
+                </div>
+
+                <!-- COLONNE DROITE : PANNEAU D'ACTION & ONGLETS (1/3 Écran) -->
+                <div class="glass-panel p-4 rounded-3xl flex flex-col h-full shadow-2xl">
+                    <!-- Onglets Navigation -->
+                    <div class="flex bg-black/30 p-1 rounded-2xl border border-white/10 mb-4 gap-1">
+                        <button data-tab="tab-turn" class="tab-btn flex-1 py-2 text-xs font-bold rounded-xl transition text-white bg-indigo-600 shadow">
+                            <i class="fa-solid fa-dice mr-1"></i> Tour
+                        </button>
+                        <button data-tab="tab-players" class="tab-btn flex-1 py-2 text-xs font-bold rounded-xl transition opacity-60 hover:opacity-100">
+                            <i class="fa-solid fa-users mr-1"></i> Joueurs
+                        </button>
+                        <button data-tab="tab-inventory" class="tab-btn flex-1 py-2 text-xs font-bold rounded-xl transition opacity-60 hover:opacity-100 relative">
+                            <i class="fa-solid fa-briefcase mr-1"></i> Cartes
+                            <span id="inv-badge" class="hidden absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span>
+                        </button>
+                        <button data-tab="tab-history" class="tab-btn flex-1 py-2 text-xs font-bold rounded-xl transition opacity-60 hover:opacity-100">
+                            <i class="fa-solid fa-scroll mr-1"></i> Hist.
+                        </button>
+                    </div>
+
+                    <!-- TAB 1: TOUR & ACTION -->
+                    <div id="tab-turn" class="tab-content flex-1 flex flex-col justify-between space-y-4">
+                        <div class="glass-card p-4 rounded-2xl text-center border-l-4" id="current-player-card">
+                            <span class="text-[10px] opacity-75 uppercase font-bold tracking-wider block mb-1">Joueur en cours</span>
+                            <div class="flex items-center justify-center gap-3">
+                                <span id="current-player-emoji" class="text-2xl">🦆</span>
+                                <h3 id="current-player-name" class="text-lg font-black">--</h3>
+                            </div>
+                            <p id="current-player-pos" class="text-xs opacity-80 mt-1">Position : Case 0</p>
+                        </div>
+
+                        <!-- 3D DICE CONTAINER -->
+                        <div class="glass-card p-6 rounded-2xl flex flex-col items-center justify-center space-y-5">
+                            <div class="flex items-center justify-center gap-6 py-2" id="dice-container">
+                                <!-- Die 1 -->
+                                <div class="dice-scene">
+                                    <div id="cube-1" class="cube">
+                                        <div class="cube-face cube-face-1"><div class="dot"></div></div>
+                                        <div class="cube-face cube-face-2"><div class="dot" style="top:10px;left:10px;"></div><div class="dot" style="bottom:10px;right:10px;"></div></div>
+                                        <div class="cube-face cube-face-3"><div class="dot" style="top:10px;left:10px;"></div><div class="dot"></div><div class="dot" style="bottom:10px;right:10px;"></div></div>
+                                        <div class="cube-face cube-face-4"><div class="dot" style="top:10px;left:10px;"></div><div class="dot" style="top:10px;right:10px;"></div><div class="dot" style="bottom:10px;left:10px;"></div><div class="dot" style="bottom:10px;right:10px;"></div></div>
+                                        <div class="cube-face cube-face-5"><div class="dot" style="top:10px;left:10px;"></div><div class="dot" style="top:10px;right:10px;"></div><div class="dot"></div><div class="dot" style="bottom:10px;left:10px;"></div><div class="dot" style="bottom:10px;right:10px;"></div></div>
+                                        <div class="cube-face cube-face-6"><div class="dot" style="top:10px;left:10px;"></div><div class="dot" style="top:10px;right:10px;"></div><div class="dot" style="top:25px;left:10px;"></div><div class="dot" style="top:25px;right:10px;"></div><div class="dot" style="bottom:10px;left:10px;"></div><div class="dot" style="bottom:10px;right:10px;"></div></div>
+                                    </div>
+                                </div>
+                                <!-- Die 2 -->
+                                <div id="dice-scene-2" class="dice-scene">
+                                    <div id="cube-2" class="cube">
+                                        <div class="cube-face cube-face-1"><div class="dot"></div></div>
+                                        <div class="cube-face cube-face-2"><div class="dot" style="top:10px;left:10px;"></div><div class="dot" style="bottom:10px;right:10px;"></div></div>
+                                        <div class="cube-face cube-face-3"><div class="dot" style="top:10px;left:10px;"></div><div class="dot"></div><div class="dot" style="bottom:10px;right:10px;"></div></div>
+                                        <div class="cube-face cube-face-4"><div class="dot" style="top:10px;left:10px;"></div><div class="dot" style="top:10px;right:10px;"></div><div class="dot" style="bottom:10px;left:10px;"></div><div class="dot" style="bottom:10px;right:10px;"></div></div>
+                                        <div class="cube-face cube-face-5"><div class="dot" style="top:10px;left:10px;"></div><div class="dot" style="top:10px;right:10px;"></div><div class="dot"></div><div class="dot" style="bottom:10px;left:10px;"></div><div class="dot" style="bottom:10px;right:10px;"></div></div>
+                                        <div class="cube-face cube-face-6"><div class="dot" style="top:10px;left:10px;"></div><div class="dot" style="top:10px;right:10px;"></div><div class="dot" style="top:25px;left:10px;"></div><div class="dot" style="top:25px;right:10px;"></div><div class="dot" style="bottom:10px;left:10px;"></div><div class="dot" style="bottom:10px;right:10px;"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button id="btn-roll-dice" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-base rounded-xl shadow-lg transition transform hover:scale-105 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-dice"></i> Lancer le(s) Dé(s)
+                            </button>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-black/20 border border-white/10 text-xs min-h-[70px] flex items-center" id="last-action-msg">
+                            <i class="fa-solid fa-info-circle text-indigo-400 mr-2"></i> Cliquez sur Lancer pour faire avancer votre pion.
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: JOUEURS -->
+                    <div id="tab-players" class="tab-content hidden flex-1 overflow-y-auto space-y-2 pr-1">
+                        <!-- Dynamic list -->
+                    </div>
+
+                    <!-- TAB 3: INVENTAIRE CARTES -->
+                    <div id="tab-inventory" class="tab-content hidden flex-1 flex flex-col">
+                        <h4 class="text-xs font-bold opacity-75 uppercase mb-2">Inventaire de <span id="inv-player-name" class="text-indigo-400">--</span></h4>
+                        <div id="inventory-list" class="space-y-2 flex-1 overflow-y-auto pr-1">
+                            <!-- Cards -->
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: HISTORIQUE -->
+                    <div id="tab-history" class="tab-content hidden flex-1 flex flex-col">
+                        <div id="history-log" class="flex-1 overflow-y-auto space-y-2 text-xs p-2 bg-black/30 rounded-xl border border-white/10">
+                            <!-- Logs -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ================= MODALE RÈGLES ================= -->
+    <div id="rules-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="glass-panel max-w-lg w-full p-6 rounded-3xl space-y-4 max-h-[85vh] overflow-y-auto border border-white/20">
+            <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                <h3 class="text-xl font-extrabold flex items-center gap-2">
+                    <i class="fa-solid fa-book-open text-indigo-400"></i> Règles du Jeu
+                </h3>
+                <button id="btn-close-rules" class="text-lg hover:opacity-75"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs leading-relaxed opacity-90">
+                <p><strong>🎯 Objectif :</strong> Atteindre exactement la case Victoire finale au centre du plateau !</p>
+                <p><strong>🎲 Fin de plateau :</strong> Pour gagner, vous devez obtenir exactement <strong>6</strong> (si 1 dé) ou <strong>12 (Double 6)</strong> (si 2 dés). En cas de dépassement, votre pion rebondit en arrière !</p>
+                <p><strong>🏰 Villes (20%, 40%, 60%, 80%) :</strong> Cases étapes historiques (Avignon, Marseille, Lyon, Paris).</p>
+                <p><strong>⚡ Boost / Recul :</strong> Te font avancer (+4, +5, +6) ou reculer (-4, -5, -6). <em>Règle Anti-Chaîne :</em> Si tu atterris sur un nouveau boost/recul après un déplacement, l'effet s'arrête !</p>
+                <p><strong>🛸 OVNI :</strong> Échange ta position avec un autre joueur au hasard.</p>
+                <p><strong>🍀 Chance :</strong> Événement instantané (Téléportation ville, Déplacement surprise, Retour au départ, OVNI).</p>
+                <p><strong>📦 Cartes :</strong> Conservées dans ton inventaire ! Utilise-les au début ou pendant ton tour.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODALE ÉVÉNEMENT ================= -->
+    <div id="event-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="glass-panel max-w-md w-full p-6 rounded-3xl text-center space-y-4 border border-white/20 shadow-2xl">
+            <div id="modal-icon-container" class="w-16 h-16 mx-auto rounded-full bg-indigo-600/30 flex items-center justify-center text-3xl text-indigo-400">
+                <i id="modal-icon" class="fa-solid fa-star"></i>
+            </div>
+            <div>
+                <h3 id="modal-title" class="text-xl font-black mb-1">Événement</h3>
+                <p id="modal-description" class="text-xs opacity-90 leading-relaxed">Description...</p>
+            </div>
+            <button id="btn-close-modal" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition">
+                Continuer
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= MODALE VICTOIRE ================= -->
+    <div id="victory-modal" class="fixed inset-0 bg-black/90 backdrop-blur-lg hidden items-center justify-center p-4 z-50">
+        <div class="glass-panel max-w-md w-full p-6 rounded-3xl text-center space-y-5 border-2 border-amber-500/50 shadow-2xl">
+            <div class="w-20 h-20 mx-auto rounded-full bg-amber-500/20 flex items-center justify-center text-4xl text-amber-400">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-black text-amber-400">Victoire Épique !</h2>
+                <p class="text-sm mt-1"><span id="winner-name" class="font-bold text-white text-base">--</span> a remporté la partie !</p>
+            </div>
+            <div id="podium-list" class="space-y-1.5 text-xs text-left bg-black/30 p-3 rounded-xl border border-white/10 max-h-40 overflow-y-auto">
+                <!-- Podiums -->
+            </div>
+            <button id="btn-victory-restart" class="w-full py-3.5 bg-gradient-to-r from-indigo-500 to-pink-500 font-extrabold text-white rounded-xl shadow-lg transition">
+                Rejouer une Nouvelle Partie
+            </button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT CORE LOGIC -->
+    <script>
+        // --- CONSTANTS & EMOJIS ---
+        const RANDOM_NAMES = ["Antoine", "Benoît", "Camille", "Clara", "Gabriel", "Hugo", "Inès", "Léa", "Lucas", "Manon", "Mathieu", "Océane", "Thomas", "Théo", "Yanis", "Zoé"];
+        const EMOJI_LIST = ["🦆", "🐓", "🦄", "🦊", "🐶", "🐱", "🦁", "🐸", "🚀", "🛸", "🏎️", "🤖", "👑", "⚽", "🍕", "💎"];
+        const PLAYER_COLORS = [
+            { bg: "bg-indigo-500", hex: "#6366f1" },
+            { bg: "bg-pink-500", hex: "#ec4899" },
+            { bg: "bg-emerald-500", hex: "#10b981" },
+            { bg: "bg-amber-500", hex: "#f59e0b" },
+            { bg: "bg-cyan-500", hex: "#06b6d4" },
+            { bg: "bg-purple-500", hex: "#a855f7" },
+            { bg: "bg-red-500", hex: "#ef4444" },
+            { bg: "bg-lime-500", hex: "#84cc16" }
+        ];
+
+        // PRESETS
+        const PRESETS = {
+            normal: { empty: 40, boost: 15, recul: 15, ovni: 10, chance: 10, card: 10 },
+            chaos: { empty: 20, boost: 20, recul: 20, ovni: 20, chance: 10, card: 10 },
+            chance: { empty: 20, boost: 10, recul: 10, ovni: 10, chance: 25, card: 25 }
+        };
+
+        // --- GAME STATE ---
+        let gameState = {
+            players: [],
+            currentPlayerIndex: 0,
+            boardSize: 60,
+            diceCount: 2,
+            doubleRule: true,
+            boardTiles: [],
+            cityPositions: {},
+            spiralCoords: [],
+            isRolling: false,
+            winner: null
+        };
+
+        // --- DOM REFERENCES ---
+        const setupScreen = document.getElementById('setup-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const inputPlayers = document.getElementById('input-players');
+        const playerCountVal = document.getElementById('player-count-val');
+        const playersListInputs = document.getElementById('players-list-inputs');
+        const inputBoardSize = document.getElementById('input-board-size');
+        const boardSizeVal = document.getElementById('board-size-val');
+        const tileInputs = document.querySelectorAll('.tile-percent-input');
+        const btnRollDice = document.getElementById('btn-roll-dice');
+
+        // --- INITIALIZATION ---
+        window.addEventListener('DOMContentLoaded', () => {
+            renderPlayerInputs(parseInt(inputPlayers.value));
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Theme Switcher
+            document.getElementById('theme-select').addEventListener('change', (e) => {
+                document.documentElement.setAttribute('data-theme', e.target.value);
+            });
+
+            // Player Count Slider
+            inputPlayers.addEventListener('input', (e) => {
+                const count = parseInt(e.target.value);
+                playerCountVal.textContent = count;
+                renderPlayerInputs(count);
+            });
+
+            // Board Size Slider
+            inputBoardSize.addEventListener('input', (e) => {
+                boardSizeVal.textContent = e.target.value;
+            });
+
+            // Presets
+            document.querySelectorAll('.btn-preset').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const presetKey = btn.dataset.preset;
+                    const p = PRESETS[presetKey];
+                    if (p) {
+                        tileInputs.forEach(inp => {
+                            inp.value = p[inp.dataset.type] || 0;
+                        });
+                        validatePercentages();
+                    }
+                });
+            });
+
+            // Random Names
+            document.getElementById('btn-random-names').addEventListener('click', () => {
+                const shuffled = [...RANDOM_NAMES].sort(() => 0.5 - Math.random());
+                playersListInputs.querySelectorAll('.player-name-input').forEach((inp, idx) => {
+                    inp.value = shuffled[idx % shuffled.length];
+                });
+            });
+
+            // Validate Percentages
+            tileInputs.forEach(inp => inp.addEventListener('input', validatePercentages));
+
+            // Config Form Submit
+            document.getElementById('config-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (!validatePercentages()) {
+                    alert("Le total des pourcentages de cases doit être exactement 100% !");
+                    return;
+                }
+                startGame();
+            });
+
+            // Rules Modal
+            document.getElementById('btn-rules').addEventListener('click', () => {
+                document.getElementById('rules-modal').classList.remove('hidden');
+                document.getElementById('rules-modal').classList.add('flex');
+            });
+            document.getElementById('btn-close-rules').addEventListener('click', () => {
+                document.getElementById('rules-modal').classList.add('hidden');
+            });
+
+            // Roll Dice Action
+            btnRollDice.addEventListener('click', handleDiceRoll);
+
+            // Restart Actions
+            document.getElementById('btn-restart-game').addEventListener('click', resetToSetup);
+            document.getElementById('btn-victory-restart').addEventListener('click', () => {
+                document.getElementById('victory-modal').classList.add('hidden');
+                resetToSetup();
+            });
+
+            // Tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+            });
+
+            document.getElementById('btn-close-modal').addEventListener('click', () => {
+                document.getElementById('event-modal').classList.add('hidden');
+            });
+
+            // Resize Window -> Re-align Pawns
+            window.addEventListener('resize', () => {
+                if (!gameScreen.classList.contains('hidden')) {
+                    updatePawnsPositionsSmooth();
+                }
+            });
+        }
+
+        // Render setup players with Emoji Picker
+        function renderPlayerInputs(count) {
+            playersListInputs.innerHTML = '';
+            const shuffledNames = [...RANDOM_NAMES].sort(() => 0.5 - Math.random());
+
+            for (let i = 0; i < count; i++) {
+                const color = PLAYER_COLORS[i % PLAYER_COLORS.length];
+                const defaultName = shuffledNames[i % shuffledNames.length];
+                const defaultEmoji = EMOJI_LIST[i % EMOJI_LIST.length];
+
+                const div = document.createElement('div');
+                div.className = "flex items-center space-x-2 glass-card p-2 rounded-xl border border-white/10";
+                div.innerHTML = `
+                    <div class="w-3.5 h-3.5 rounded-full ${color.bg} flex-shrink-0"></div>
+                    <select class="player-emoji-select bg-black/40 text-sm border-none rounded p-1 cursor-pointer">
+                        ${EMOJI_LIST.map(e => `<option value="${e}" ${e === defaultEmoji ? 'selected' : ''}>${e}</option>`).join('')}
+                    </select>
+                    <input type="text" value="${defaultName}" maxlength="12" class="player-name-input w-full bg-transparent text-xs text-white border-none focus:outline-none font-bold" placeholder="Joueur ${i+1}">
+                `;
+                playersListInputs.appendChild(div);
+            }
+        }
+
+        function validatePercentages() {
+            let total = 0;
+            tileInputs.forEach(inp => total += parseInt(inp.value) || 0);
+            document.getElementById('total-percent').textContent = total;
+            const badge = document.getElementById('total-percent-badge');
+            if (total === 100) {
+                badge.className = "text-xs font-extrabold px-3 py-1 rounded-full border bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
+                return true;
+            } else {
+                badge.className = "text-xs font-extrabold px-3 py-1 rounded-full border bg-rose-500/20 text-rose-300 border-rose-500/40";
+                return false;
+            }
+        }
+
+        // --- START GAME & SPIRAL GENERATION ---
+        function startGame() {
+            gameState.boardSize = parseInt(inputBoardSize.value);
+            gameState.diceCount = parseInt(document.querySelector('input[name="dice-count"]:checked').value);
+            gameState.doubleRule = document.getElementById('input-double-rule').checked && gameState.diceCount === 2;
+
+            // Read Players
+            const nameInputs = playersListInputs.querySelectorAll('.player-name-input');
+            const emojiSelects = playersListInputs.querySelectorAll('.player-emoji-select');
+            
+            gameState.players = [];
+            nameInputs.forEach((inp, idx) => {
+                gameState.players.push({
+                    id: idx,
+                    name: inp.value.trim() || `Joueur ${idx + 1}`,
+                    emoji: emojiSelects[idx].value,
+                    position: 0,
+                    color: PLAYER_COLORS[idx % PLAYER_COLORS.length],
+                    inventory: []
+                });
+            });
+
+            // Random turn order
+            gameState.players.sort(() => 0.5 - Math.random());
+            gameState.currentPlayerIndex = 0;
+
+            generateBoardTiles();
+
+            // UI Setup
+            document.getElementById('max-tile-display').textContent = gameState.boardSize;
+            if (gameState.diceCount === 1) {
+                document.getElementById('dice-scene-2').classList.add('hidden');
+            } else {
+                document.getElementById('dice-scene-2').classList.remove('hidden');
+            }
+
+            setupScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            document.getElementById('btn-restart-game').classList.remove('hidden');
+
+            renderSpiralBoard();
+            createPawnElements();
+            updatePawnsPositionsSmooth();
+            updateTopNotification();
+            updateTurnUI();
+            updatePlayersTab();
+            updateInventoryTab();
+
+            addLog("🎮 Début de la partie ! Ordre des joueurs : " + gameState.players.map(p => p.emoji + " " + p.name).join(", "));
+        }
+
+        function generateBoardTiles() {
+            const size = gameState.boardSize;
+            gameState.boardTiles = new Array(size + 1).fill('empty');
+
+            // Fixed City Tiles (Avignon 20%, Marseille 40%, Lyon 60%, Paris 80%)
+            gameState.cityPositions = {
+                [Math.round(size * 0.20)]: { name: "Avignon", icon: "fa-monument", color: "text-amber-400" },
+                [Math.round(size * 0.40)]: { name: "Marseille", icon: "fa-anchor", color: "text-cyan-400" },
+                [Math.round(size * 0.60)]: { name: "Lyon", icon: "fa-mountain-city", color: "text-indigo-400" },
+                [Math.round(size * 0.80)]: { name: "Paris", icon: "fa-tower-observation", color: "text-pink-400" }
+            };
+
+            const fixed = new Set([0, size, ...Object.keys(gameState.cityPositions).map(Number)]);
+            const perc = {};
+            tileInputs.forEach(i => perc[i.dataset.type] = parseInt(i.value) || 0);
+
+            const spots = [];
+            for (let i = 1; i < size; i++) if (!fixed.has(i)) spots.push(i);
+            spots.sort(() => 0.5 - Math.random());
+
+            let spotIdx = 0;
+            const total = spots.length;
+
+            ['boost', 'recul', 'ovni', 'chance', 'card'].forEach(type => {
+                const count = Math.round((perc[type] / 100) * total);
+                for (let c = 0; c < count && spotIdx < total; c++) {
+                    gameState.boardTiles[spots[spotIdx]] = type;
+                    spotIdx++;
+                }
+            });
+        }
+
+        // Generate Spiral Grid Math Matrix
+        function renderSpiralBoard() {
+            const wrapper = document.getElementById('board-grid-wrapper');
+            wrapper.innerHTML = '';
+
+            const totalTiles = gameState.boardSize + 1; // 0 to boardSize
+            // Calculate grid size (N x N)
+            let N = 9;
+            if (totalTiles > 70) N = 11;
+            if (totalTiles > 90) N = 13;
+
+            wrapper.style.gridTemplateColumns = `repeat(${N}, minmax(42px, 1fr))`;
+            wrapper.style.gridTemplateRows = `repeat(${N}, minmax(42px, 1fr))`;
+
+            // Matrix generation for inward spiral
+            const matrix = Array.from({ length: N }, () => Array(N).fill(-1));
+            let left = 0, right = N - 1, top = 0, bottom = N - 1;
+            let current = 0;
+
+            while (left <= right && top <= bottom && current < totalTiles) {
+                // Top row
+                for (let col = left; col <= right && current < totalTiles; col++) matrix[top][col] = current++;
+                top++;
+                // Right col
+                for (let row = top; row <= bottom && current < totalTiles; row++) matrix[row][right] = current++;
+                right--;
+                // Bottom row
+                for (let col = right; col >= left && current < totalTiles; col--) matrix[bottom][col] = current++;
+                bottom--;
+                // Left col
+                for (let row = bottom; row >= top && current < totalTiles; row--) matrix[row][left] = current++;
+                left++;
+            }
+
+            // Find center position for giant Victory goose
+            const centerStartRow = Math.floor(N / 2) - 1;
+            const centerStartCol = Math.floor(N / 2) - 1;
+
+            gameState.spiralCoords = {};
+
+            for (let r = 0; r < N; r++) {
+                for (let c = 0; c < N; c++) {
+                    const tileNum = matrix[r][c];
+
+                    // If cell is inside the 2x2 central victory tile area
+                    if (r >= centerStartRow && r <= centerStartRow + 1 && c >= centerStartCol && c <= centerStartCol + 1) {
+                        if (r === centerStartRow && c === centerStartCol) {
+                            // Render Giant Victory Goose Tile
+                            const vicTile = document.createElement('div');
+                            vicTile.id = `tile-${gameState.boardSize}`;
+                            vicTile.className = "tile-cell bg-gradient-to-br from-amber-500/30 via-yellow-500/20 to-amber-600/40 border-2 border-amber-400 font-bold text-amber-300 flex flex-col items-center justify-center p-2 rounded-2xl shadow-xl";
+                            vicTile.style.gridRow = `${centerStartRow + 1} / span 2`;
+                            vicTile.style.gridColumn = `${centerStartCol + 1} / span 2`;
+                            
+                            vicTile.innerHTML = `
+                                <div class="w-full flex justify-between items-center text-[10px]">
+                                    <span class="font-mono text-amber-300 font-extrabold">#${gameState.boardSize}</span>
+                                    <span class="bg-amber-500/30 text-amber-300 px-1.5 py-0.5 rounded text-[9px] font-black uppercase">Victoire</span>
+                                </div>
+                                <div class="my-auto text-center flex flex-col items-center">
+                                    <!-- MAJESTIC SVG GOOSE -->
+                                    <svg class="w-12 h-12 text-amber-400 drop-shadow-md animate-bounce" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M42 12C42 8.68629 39.3137 6 36 6C32.6863 6 30 8.68629 30 12C30 13.5 30.55 14.87 31.46 15.93C27.5 19.5 24 25.5 24 32C24 33.5 22.5 35 20 35C17.5 35 12 33 12 33C12 33 15 38 19 40C15 41 10 40 10 40C10 40 14 45 20 46C26 47 32 46 38 43C46 39 52 32 52 24C52 18 48 14 42 12Z" fill="currentColor"/>
+                                        <path d="M42 12L52 14L44 18Z" fill="#F97316"/>
+                                        <circle cx="34" cy="10" r="2" fill="#0F172A"/>
+                                        <path d="M30 6L36 2L42 6" stroke="#FBBF24" stroke-width="2" stroke-linecap="round"/>
+                                    </svg>
+                                    <span class="text-xs font-black tracking-wide text-amber-200 mt-1">ARRIVÉE</span>
+                                </div>
+                            `;
+                            wrapper.appendChild(vicTile);
+                            gameState.spiralCoords[gameState.boardSize] = { row: centerStartRow, col: centerStartCol };
+                        }
+                        continue;
+                    }
+
+                    if (tileNum !== -1 && tileNum <= gameState.boardSize) {
+                        gameState.spiralCoords[tileNum] = { row: r, col: c };
+
+                        const cell = document.createElement('div');
+                        cell.id = `tile-${tileNum}`;
+                        cell.style.gridRow = `${r + 1}`;
+                        cell.style.gridColumn = `${c + 1}`;
+
+                        const tileType = gameState.boardTiles[tileNum];
+                        const cityInfo = gameState.cityPositions[tileNum];
+
+                        let tileContent = "";
+                        let bgClass = "bg-black/30 border-white/10";
+
+                        if (tileNum === 0) {
+                            bgClass = "bg-indigo-950/60 border-indigo-500/50 text-indigo-300 font-extrabold";
+                            tileContent = `<span class="text-[9px]">START</span><i class="fa-solid fa-flag text-xs my-1"></i><span class="text-[9px]">Départ</span>`;
+                        } else if (cityInfo) {
+                            bgClass = "bg-gradient-to-br from-indigo-900/60 to-purple-900/60 border-indigo-400/60 font-extrabold";
+                            tileContent = `<span class="text-[9px] opacity-75">#${tileNum}</span><i class="fa-solid ${cityInfo.icon} ${cityInfo.color} text-sm my-0.5"></i><span class="text-[10px] truncate max-w-full font-black">${cityInfo.name}</span>`;
+                        } else {
+                            switch (tileType) {
+                                case 'boost':
+                                    bgClass = "bg-emerald-950/30 border-emerald-500/30 text-emerald-400 font-bold";
+                                    tileContent = `<span class="text-[9px] opacity-60">#${tileNum}</span><i class="fa-solid fa-bolt text-xs my-0.5"></i><span class="text-[9px]">Avancer</span>`;
+                                    break;
+                                case 'recul':
+                                    bgClass = "bg-rose-950/30 border-rose-500/30 text-rose-400 font-bold";
+                                    tileContent = `<span class="text-[9px] opacity-60">#${tileNum}</span><i class="fa-solid fa-backward text-xs my-0.5"></i><span class="text-[9px]">Reculer</span>`;
+                                    break;
+                                case 'ovni':
+                                    bgClass = "bg-purple-950/30 border-purple-500/30 text-purple-400 font-bold";
+                                    tileContent = `<span class="text-[9px] opacity-60">#${tileNum}</span><i class="fa-solid fa-user-ninja text-xs my-0.5"></i><span class="text-[9px]">OVNI</span>`;
+                                    break;
+                                case 'chance':
+                                    bgClass = "bg-amber-950/30 border-amber-500/30 text-amber-400 font-bold";
+                                    tileContent = `<span class="text-[9px] opacity-60">#${tileNum}</span><i class="fa-solid fa-clover text-xs my-0.5"></i><span class="text-[9px]">Chance</span>`;
+                                    break;
+                                case 'card':
+                                    bgClass = "bg-blue-950/30 border-blue-500/30 text-blue-400 font-bold";
+                                    tileContent = `<span class="text-[9px] opacity-60">#${tileNum}</span><i class="fa-solid fa-box-archive text-xs my-0.5"></i><span class="text-[9px]">Carte</span>`;
+                                    break;
+                                default: // empty
+                                    tileContent = `<span class="text-[10px] font-mono opacity-50">#${tileNum}</span><span class="text-xs font-black my-auto">${tileNum}</span>`;
+                                    break;
+                            }
+                        }
+
+                        cell.className = `tile-cell ${bgClass}`;
+                        cell.innerHTML = tileContent;
+                        wrapper.appendChild(cell);
+                    }
+                }
+            }
+        }
+
+        // Pawns Dynamic Elements Creation
+        function createPawnElements() {
+            const layer = document.getElementById('pawns-layer');
+            layer.innerHTML = '';
+
+            gameState.players.forEach(p => {
+                const pawn = document.createElement('div');
+                pawn.id = `pawn-player-${p.id}`;
+                pawn.className = `pawn-element ${p.color.bg}`;
+                pawn.innerHTML = p.emoji;
+                layer.appendChild(pawn);
+            });
+        }
+
+        // SMOOTH SLIDING PAWNS ANIMATION
+        function updatePawnsPositionsSmooth() {
+            gameState.players.forEach((p, idx) => {
+                const pawnEl = document.getElementById(`pawn-player-${p.id}`);
+                const tileEl = document.getElementById(`tile-${p.position}`);
+
+                if (pawnEl && tileEl) {
+                    const boardRect = document.getElementById('board-grid-container').getBoundingClientRect();
+                    const tileRect = tileEl.getBoundingClientRect();
+
+                    // Calculate offset position relative to board container
+                    // Add slight random offset per player so they don't overlap exactly
+                    const offsetX = (idx % 3) * 6 - 6;
+                    const offsetY = Math.floor(idx / 3) * 6 - 6;
+
+                    const left = (tileRect.left - boardRect.left) + (tileRect.width / 2) - 14 + offsetX;
+                    const top = (tileRect.top - boardRect.top) + (tileRect.height / 2) - 14 + offsetY;
+
+                    pawnEl.style.transform = `translate(${left}px, ${top}px)`;
+                }
+            });
+        }
+
+        // --- 3D DICE ROLL ANIMATION ---
+        function handleDiceRoll() {
+            if (gameState.isRolling) return;
+            gameState.isRolling = true;
+            btnRollDice.disabled = true;
+
+            const cube1 = document.getElementById('cube-1');
+            const cube2 = document.getElementById('cube-2');
+
+            // Generate Random Values
+            const val1 = Math.floor(Math.random() * 6) + 1;
+            const val2 = gameState.diceCount === 2 ? Math.floor(Math.random() * 6) + 1 : 0;
+
+            // Face rotations map for 3D Cube
+            const rotations = {
+                1: { x: 0, y: 0 },
+                2: { x: 0, y: -90 },
+                3: { x: 0, y: -180 },
+                4: { x: 0, y: 90 },
+                5: { x: -90, y: 0 },
+                6: { x: 90, y: 0 }
+            };
+
+            // Add chaotic extra turns
+            const rot1 = rotations[val1];
+            const extraX1 = (Math.floor(Math.random() * 3) + 3) * 360;
+            const extraY1 = (Math.floor(Math.random() * 3) + 3) * 360;
+            cube1.style.transform = `rotateX(${rot1.x + extraX1}deg) rotateY(${rot1.y + extraY1}deg)`;
+
+            if (gameState.diceCount === 2) {
+                const rot2 = rotations[val2];
+                const extraX2 = (Math.floor(Math.random() * 3) + 3) * 360;
+                const extraY2 = (Math.floor(Math.random() * 3) + 3) * 360;
+                cube2.style.transform = `rotateX(${rot2.x + extraX2}deg) rotateY(${rot2.y + extraY2}deg)`;
+            }
+
+            setTimeout(() => {
+                const totalMove = val1 + val2;
+                const player = gameState.players[gameState.currentPlayerIndex];
+                const isDouble = gameState.diceCount === 2 && val1 === val2;
+
+                addLog(`🎲 ${player.emoji} ${player.name} lance le(s) dé(s) : ${val1}${gameState.diceCount === 2 ? ' & ' + val2 : ''} (Total: ${totalMove}).`);
+
+                animatePawnSteps(player, totalMove, isDouble);
+            }, 1250);
+        }
+
+        // STEP BY STEP SMOOTH SLIDING ANIMATION
+        function animatePawnSteps(player, totalMove, isDouble) {
+            let currentStep = 0;
+            const startPos = player.position;
+            const maxPos = gameState.boardSize;
+
+            const interval = setInterval(() => {
+                currentStep++;
+                if (startPos + currentStep <= maxPos) {
+                    player.position = startPos + currentStep;
+                    updatePawnsPositionsSmooth();
+                }
+
+                if (currentStep >= totalMove) {
+                    clearInterval(interval);
+
+                    // OVERWIN / BOUNCE CHECK
+                    const targetPos = startPos + totalMove;
+                    if (targetPos > maxPos) {
+                        const overshoot = targetPos - maxPos;
+                        player.position = maxPos - overshoot;
+                        updatePawnsPositionsSmooth();
+                        showModal("Rebond !", `↩️ ${player.emoji} ${player.name} a dépassé la fin et rebondit en case ${player.position}.`, "fa-arrow-rotate-left");
+                        finishTurnStep(player, isDouble, false);
+                    } else if (targetPos === maxPos) {
+                        // EXACT WIN REQUIREMENT (6 or 12)
+                        const reqCondition = gameState.diceCount === 1 ? (totalMove === 6) : (totalMove === 12);
+                        if (reqCondition) {
+                            handleWin(player);
+                        } else {
+                            player.position = maxPos - 1; // Bounce back by 1 if score condition not met
+                            updatePawnsPositionsSmooth();
+                            showModal("Aïe !", `🎯 ${player.emoji} ${player.name} a atteint la fin mais il faut exactement un ${gameState.diceCount === 1 ? '6' : 'Double 6'} pour gagner ! Rebond en case ${player.position}.`, "fa-shield-halved");
+                            finishTurnStep(player, isDouble, false);
+                        }
+                    } else {
+                        finishTurnStep(player, isDouble, true);
+                    }
+                }
+            }, 250);
+        }
+
+        // FINISH MOVE & APPLY TILE EFFECT WITH ANTI-CHAIN RULE
+        function finishTurnStep(player, isDouble, canTriggerTileEffect = true) {
+            updatePlayersTab();
+
+            if (canTriggerTileEffect) {
+                const pos = player.position;
+                const tileType = gameState.boardTiles[pos];
+                const cityInfo = gameState.cityPositions[pos];
+
+                if (cityInfo) {
+                    showModal(`Étape à ${cityInfo.name} !`, `🏰 ${player.emoji} ${player.name} arrive à ${cityInfo.name} (Case ${pos}). Prenez une pause culturelle !`, cityInfo.icon);
+                    addLog(`🏰 ${player.name} s'arrête à ${cityInfo.name}.`);
+                } else if (tileType === 'boost') {
+                    const boostSteps = [4, 5, 6][Math.floor(Math.random() * 3)];
+                    player.position = Math.min(gameState.boardSize, player.position + boostSteps);
+                    updatePawnsPositionsSmooth();
+                    showModal("Case Boost !", `⚡ Super Vitesse ! ${player.emoji} ${player.name} avance de +${boostSteps} jusqu'en case ${player.position}. (Règle anti-chaîne active).`, "fa-bolt");
+                    addLog(`⚡ Boost : ${player.name} avance de +${boostSteps} cases.`);
+                } else if (tileType === 'recul') {
+                    const reculSteps = [4, 5, 6][Math.floor(Math.random() * 3)];
+                    player.position = Math.max(0, player.position - reculSteps);
+                    updatePawnsPositionsSmooth();
+                    showModal("Case Recul !", `⏪ Oups ! ${player.emoji} ${player.name} recule de -${reculSteps} jusqu'en case ${player.position}. (Règle anti-chaîne active).`, "fa-backward");
+                    addLog(`⏪ Recul : ${player.name} recule de -${reculSteps} cases.`);
+                } else if (tileType === 'ovni') {
+                    triggerOvniEffect(player);
+                } else if (tileType === 'chance') {
+                    triggerChanceEffect(player);
+                } else if (tileType === 'card') {
+                    triggerCardDraw(player);
+                }
+            }
+
+            // DOUBLE TURN RULE
+            if (isDouble && gameState.doubleRule) {
+                updateTopNotification(`✨ Double ! ${player.emoji} ${player.name} rejoue immédiatement !`, "Double !");
+                addLog(`✨ Double ! ${player.name} rejoue !`);
+                gameState.isRolling = false;
+                btnRollDice.disabled = false;
+            } else {
+                nextTurn();
+            }
+        }
+
+        // --- SPECIAL TILE EFFECTS ---
+        function triggerOvniEffect(player) {
+            const others = gameState.players.filter(p => p.id !== player.id);
+            if (others.length === 0) return;
+
+            const target = others[Math.floor(Math.random() * others.length)];
+            const temp = player.position;
+            player.position = target.position;
+            target.position = temp;
+
+            updatePawnsPositionsSmooth();
+            showModal("Échange OVNI !", `🛸 Un OVNI a interverti la position de ${player.emoji} ${player.name} avec celle de ${target.emoji} ${target.name} !`, "fa-user-ninja");
+            addLog(`🛸 OVNI : ${player.name} échange sa position avec ${target.name}.`);
+        }
+
+        function triggerChanceEffect(player) {
+            const events = ['city', 'move', 'start'];
+            const ev = events[Math.floor(Math.random() * events.length)];
+
+            if (ev === 'city') {
+                const cities = Object.keys(gameState.cityPositions).map(Number);
+                const pos = cities[Math.floor(Math.random() * cities.length)];
+                player.position = pos;
+                showModal("Événement Chance !", `🍀 Téléportation ! ${player.emoji} ${player.name} est propulsé à ${gameState.cityPositions[pos].name} !`, "fa-clover");
+            } else if (ev === 'move') {
+                const steps = (Math.floor(Math.random() * 5) + 4) * (Math.random() > 0.5 ? 1 : -1);
+                player.position = Math.min(gameState.boardSize, Math.max(0, player.position + steps));
+                showModal("Événement Chance !", `🍀 Vague mystérieuse ! ${player.emoji} ${player.name} ${steps > 0 ? 'avance' : 'recule'} de ${Math.abs(steps)} cases.`, "fa-wind");
+            } else {
+                player.position = 0;
+                showModal("Événement Chance !", `💥 Aïe ! Catastrophe, ${player.emoji} ${player.name} retourne à la case départ (0) !`, "fa-rotate-left");
+            }
+            updatePawnsPositionsSmooth();
+        }
+
+        function triggerCardDraw(player) {
+            const cardTypes = [
+                { type: 'chance', name: 'Carte Chance Mystère', icon: 'fa-clover', color: 'text-amber-400' },
+                { type: 'boost', name: 'Carte Boost (+4 à +6)', icon: 'fa-bolt', color: 'text-emerald-400' },
+                { type: 'replay', name: 'Carte Rejouer', icon: 'fa-rotate-right', color: 'text-indigo-400' }
+            ];
+            const drawn = cardTypes[Math.floor(Math.random() * cardTypes.length)];
+            player.inventory.push(drawn);
+
+            showModal("Nouvelle Carte !", `📦 ${player.emoji} ${player.name} gagne la carte <strong>${drawn.name}</strong> !`, "fa-box-archive");
+            addLog(`📦 ${player.name} obtient la carte "${drawn.name}".`);
+            updateInventoryTab();
+        }
+
+        function useCard(cardIndex) {
+            const player = gameState.players[gameState.currentPlayerIndex];
+            const card = player.inventory[cardIndex];
+            if (!card) return;
+
+            player.inventory.splice(cardIndex, 1);
+            updateInventoryTab();
+            addLog(`🃏 ${player.name} utilise la carte "${card.name}".`);
+
+            if (card.type === 'boost') {
+                const steps = [4, 5, 6][Math.floor(Math.random() * 3)];
+                player.position = Math.min(gameState.boardSize, player.position + steps);
+                updatePawnsPositionsSmooth();
+                showModal("Carte Utilisée !", `${player.emoji} ${player.name} avance de +${steps} cases !`, "fa-bolt");
+            } else if (card.type === 'replay') {
+                showModal("Carte Utilisée !", `${player.emoji} ${player.name} rejoue immédiatement !`, "fa-rotate-right");
+                gameState.isRolling = false;
+                btnRollDice.disabled = false;
+            } else if (card.type === 'chance') {
+                triggerChanceEffect(player);
+            }
+            updatePlayersTab();
+        }
+
+        // --- TOP BANNER NOTIFICATION & TURNS ---
+        function nextTurn() {
+            gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
+            gameState.isRolling = false;
+            btnRollDice.disabled = false;
+            updateTopNotification();
+            updateTurnUI();
+            updateInventoryTab();
+        }
+
+        function updateTopNotification(customTitle = null, customBadge = "En Tour") {
+            const p = gameState.players[gameState.currentPlayerIndex];
+            document.getElementById('notif-pawn-avatar').textContent = p.emoji;
+            document.getElementById('notif-pawn-avatar').style.borderColor = p.color.hex;
+
+            if (customTitle) {
+                document.getElementById('notif-title').textContent = customTitle;
+            } else {
+                document.getElementById('notif-title').textContent = `C'est au tour de ${p.name} !`;
+            }
+            document.getElementById('notif-subtitle').textContent = `Position actuelle : Case ${p.position} sur ${gameState.boardSize}`;
+            document.getElementById('notif-badge').textContent = customBadge;
+        }
+
+        function updateTurnUI() {
+            const p = gameState.players[gameState.currentPlayerIndex];
+            document.getElementById('current-player-name').textContent = p.name;
+            document.getElementById('current-player-emoji').textContent = p.emoji;
+            document.getElementById('current-player-pos').textContent = `Position : Case ${p.position} / ${gameState.boardSize}`;
+            document.getElementById('current-player-card').style.borderColor = p.color.hex;
+        }
+
+        // --- TAB UPDATES ---
+        function updatePlayersTab() {
+            const container = document.getElementById('tab-players');
+            container.innerHTML = '';
+
+            let maxPos = -1;
+            gameState.players.forEach(p => { if (p.position > maxPos) maxPos = p.position; });
+
+            gameState.players.forEach((p, idx) => {
+                const isCurrent = idx === gameState.currentPlayerIndex;
+                const isLeader = p.position === maxPos && maxPos > 0;
+                const gap = gameState.boardSize - p.position;
+
+                const card = document.createElement('div');
+                card.className = `p-2.5 rounded-xl border ${isCurrent ? 'bg-indigo-900/40 border-indigo-400' : 'glass-card border-white/10'} flex justify-between items-center`;
+                card.innerHTML = `
+                    <div class="flex items-center space-x-2.5">
+                        <span class="text-xl">${p.emoji}</span>
+                        <div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-bold text-xs text-white">${p.name}</span>
+                                ${isCurrent ? '<span class="text-[8px] bg-indigo-500/40 text-indigo-200 px-1 rounded font-bold">Tour</span>' : ''}
+                                ${isLeader ? '<span class="text-[8px] bg-amber-500/40 text-amber-200 px-1 rounded font-bold">👑 Leader</span>' : ''}
+                            </div>
+                            <span class="text-[10px] opacity-75">Case ${p.position} / ${gameState.boardSize}</span>
+                        </div>
+                    </div>
+                    <span class="text-[11px] font-bold opacity-80">Reste : ${gap}</span>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateInventoryTab() {
+            const p = gameState.players[gameState.currentPlayerIndex];
+            document.getElementById('inv-player-name').textContent = p.name;
+
+            const badge = document.getElementById('inv-badge');
+            if (p.inventory.length > 0) {
+                badge.textContent = p.inventory.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            const list = document.getElementById('inventory-list');
+            list.innerHTML = '';
+
+            if (p.inventory.length === 0) {
+                list.innerHTML = '<div class="text-xs opacity-50 text-center py-6">Aucune carte disponible.</div>';
+                return;
+            }
+
+            p.inventory.forEach((card, idx) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = "glass-card p-2.5 rounded-xl flex justify-between items-center border border-white/10";
+                cardEl.innerHTML = `
+                    <div class="flex items-center space-x-2.5">
+                        <i class="fa-solid ${card.icon} ${card.color} text-base"></i>
+                        <span class="font-bold text-xs">${card.name}</span>
+                    </div>
+                    <button onclick="useCard(${idx})" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition">
+                        Jouer
+                    </button>
+                `;
+                list.appendChild(cardEl);
+            });
+        }
+
+        function addLog(msg) {
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const item = document.createElement('div');
+            item.className = "p-1.5 rounded bg-black/40 border border-white/5 opacity-90 leading-snug";
+            item.innerHTML = `<span class="opacity-50 text-[10px] font-mono">[${time}]</span> ${msg}`;
+            const historyLog = document.getElementById('history-log');
+            historyLog.prepend(item);
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tabId) {
+                    btn.className = "tab-btn flex-1 py-2 text-xs font-bold rounded-xl transition text-white bg-indigo-600 shadow";
+                } else {
+                    btn.className = "tab-btn flex-1 py-2 text-xs font-bold rounded-xl transition opacity-60 hover:opacity-100";
+                }
+            });
+
+            document.querySelectorAll('.tab-content').forEach(c => {
+                if (c.id === tabId) c.classList.remove('hidden');
+                else c.classList.add('hidden');
+            });
+        }
+
+        function showModal(title, desc, icon) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-description').innerHTML = desc;
+            document.getElementById('modal-icon').className = `fa-solid ${icon}`;
+            document.getElementById('event-modal').classList.remove('hidden');
+            document.getElementById('event-modal').classList.add('flex');
+        }
+
+        function handleWin(winner) {
+            gameState.winner = winner;
+            addLog(`🏆 VICTOIRE DE ${winner.emoji} ${winner.name.toUpperCase()} !`);
+
+            document.getElementById('winner-name').textContent = `${winner.emoji} ${winner.name}`;
+
+            const ranking = [...gameState.players].sort((a, b) => b.position - a.position);
+            const podiumList = document.getElementById('podium-list');
+            podiumList.innerHTML = '';
+
+            ranking.forEach((p, idx) => {
+                const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+                const row = document.createElement('div');
+                row.className = "flex justify-between items-center p-2 rounded-lg bg-black/40";
+                row.innerHTML = `
+                    <span class="font-bold"><span class="mr-2">${medal}</span> ${p.emoji} ${p.name}</span>
+                    <span class="text-xs opacity-75">Case ${p.position}</span>
+                `;
+                podiumList.appendChild(row);
+            });
+
+            document.getElementById('victory-modal').classList.remove('hidden');
+            document.getElementById('victory-modal').classList.add('flex');
+        }
+
+        function resetToSetup() {
+            gameScreen.classList.add('hidden');
+            setupScreen.classList.remove('hidden');
+            document.getElementById('btn-restart-game').classList.add('hidden');
+            document.getElementById('history-log').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
